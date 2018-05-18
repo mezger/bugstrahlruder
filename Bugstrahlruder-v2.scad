@@ -31,6 +31,8 @@ module bugstrahlruder_topf(rohrdurchmesser, breite)
                 cylinder(h=breite,r=rohrdurchmesser/2-wand,$fn=100);
         //Dichtungsnut
         dichtungsnut(topfradius, topfhoehe);
+        //Wellenaufnahme im Boden
+        translate([0,0,wand-1]) cylinder(h=1,r=achse/2+0.1,$fn=100);
     }
 }
 
