@@ -140,8 +140,14 @@ module bugstrahlruder_deckel()
 {
     difference()
     {
-        //Deckelscheibe
-        cylinder(h=wand,r=topfradius+nut+schraube+2*wand);
+        union()
+        {
+            //Deckelscheibe
+            cylinder(h=wand,r=topfradius+nut+schraube+2*wand);
+            //Kegel zur Verstärkung
+            translate([0,0,wand]) 
+                cylinder(h=2*wand, r1=topfradius+nut+wand, r2=motord/2);
+        }
         //davon abziehen:
         //Schraubenlöcher
         for (i = [0:2])
