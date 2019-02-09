@@ -15,7 +15,7 @@ laenge=70;
 //Achsdurchmesser
 achse=1.8;
 //Motordurchmesser
-motord=24;
+motord=24.5;
 //Höhe Motorhalterung
 motorh=20;
 //Durchmesser Loch für Motor
@@ -34,9 +34,12 @@ translate([0,-4*rohr,0])
     bugstrahlruder_deckel();
 translate([4*rohr,0,0]) 
     bugstrahlruder_rotor();
+
 //translate([0,0,wand+rohr+3]) rotate([0,180,0]) bugstrahlruder_rotor();
 
-
+/*****************************************************************/
+/* TOPF                                                          */
+/*****************************************************************/
 module bugstrahlruder_topf()
 {
     //Topf
@@ -47,7 +50,7 @@ module bugstrahlruder_topf()
             //Topfmassiv
             cylinder(h=topfhoehe,r=topfradius);
             //Querrohr
-            translate([-(0.5*laenge),topfradius-rohr/2,topfhoehe/2])
+            translate([-(0.5*laenge),topfradius-rohr/2-2*wand,topfhoehe/2])
                 rotate(a=[0,90,0])
                     cylinder(h=laenge,d=rohr);
             //Befestigungsrand
@@ -62,7 +65,7 @@ module bugstrahlruder_topf()
         translate([0,0,wand])
             cylinder(h=topfhoehe-wand,r=topfradius-wand);
         //Querrohrinneres
-        translate([-(0.5*laenge),topfradius-rohr/2,topfhoehe/2])
+        translate([-(0.5*laenge),topfradius-rohr/2-2*wand,topfhoehe/2])
             rotate(a=[0,90,0])
                 cylinder(h=laenge,r=rohr/2-wand);
         //Dichtungsnut
@@ -78,7 +81,7 @@ module befestigungsrand()
     {
         translate([0,0,topfhoehe-wand])
             cylinder(h=wand,r=topfradius+nut+schraube+2*wand);
-        translate([0,0,topfhoehe-3*wand])
+        translate([0,0,topfhoehe-5*wand])
             cylinder(h=wand,r=topfradius);
      }
 }
@@ -93,8 +96,8 @@ module befestigungsloecher()
                 translate([0,topfradius+nut+schraube/2+wand,topfhoehe-3*wand])
                     cylinder(h=3*wand,r=schraube/2);
                 //Ausschnitt für Mutter M3
-                translate([0,topfradius+nut+schraube/2+wand,topfhoehe-3*wand])
-                    cylinder(h=2*wand,r=5.5/2/cos(180/6)+0.05,$fn=6);
+                translate([0,topfradius+nut+schraube/2+wand,topfhoehe-5*wand])
+                    cylinder(h=4*wand,r=5.5/2/cos(180/6)+0.05,$fn=6);
             }
 }
 
@@ -109,6 +112,9 @@ module dichtungsnut()
 }
 
 
+/*****************************************************************/
+/* DECKEL                                                        */
+/*****************************************************************/
 module bugstrahlruder_deckel()
 {
     difference()
@@ -134,19 +140,33 @@ module bugstrahlruder_deckel()
     translate([0,0,wand]) 
         difference()
         {
-            cylinder(h=motorh,d=motord+2*wand);
+            union()
+            {
+                //Motorhalter
+                cylinder(h=motorh,d=motord+2*wand);
+                //Schraubenhubbel
+                 for (i = [0:2]) //3 Hubbel
+                    rotate([0,0,120*i]) //jeweils 120°
+                        translate([0,motord/2,wand+motorh/2]) //hoch auf hälfte
+                            rotate([-90,0,0]) //Kegel flachlegen
+                                cylinder(h=2*wand,d1=12,d2=5); //aussen 5mm, innen 12
+               
+            }
             //inneres
             cylinder(h=motorh,d=motord);
             //Löcher zur Motorbefestigung
             for (i = [0:2]) //3 Löcher
                 rotate([0,0,120*i]) //jeweils 120°
-                    translate([0,0,wand+motorh/2]) //hoch auf hälfte
+                    translate([0,motord/2-wand,wand+motorh/2]) //hoch auf hälfte
                         rotate([-90,0,0]) //cylinder flachlegen
-                            cylinder(h=motord/2+wand,d=3); //3mm Loch für M3
+                            cylinder(h=3*wand,d=3); //3mm Loch für M3
         }
 }
 
 
+/*****************************************************************/
+/* ROTOR                                                         */
+/*****************************************************************/
 module bugstrahlruder_rotor()
 {
     radius=achse+rohr-0.5;
