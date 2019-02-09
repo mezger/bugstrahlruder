@@ -1,41 +1,59 @@
-/******* BUGSTRAHLRUDER **********/
+/*****************************************************************/
+/*                   BUGSTRAHLRUDER                              */
+/*****************************************************************/
+
+/****** PARAMETER ******/
 
 //Wandstärke von Topf, Deckel, Rohr, ...
 wand=1.6;
-//Durchmesser des Schraublochs für M3 Schraube
-schraube=3.2;
-//Nutbreite = Durchmesser des Dichtrings
-nut=3; //1.5;
 
-//Aussenduchmesser des Querrohrs
-rohr=14;
+//Nutbreite = Durchmesser des Dichtrings
+nut=3;
+
+//Innenduchmesser des Querrohrs
+rohrid=11;
+
 //Länge des Querrohrs
 laenge=70;
 
-//Achsdurchmesser
-achse=1.8;
+//Motor Achsdurchmesser
+achse=2.0;
+
 //Motordurchmesser
 motord=24.5;
-//Höhe Motorhalterung
-motorh=20;
+
 //Durchmesser Loch für Motor
 motorloch=6.2;
 
-/* abgeleitete Variablen */
+/****** FESTE WERTE ******/
 
+//Durchmesser des Schraublochs für M3 Schraube
+schraube=3.2;
+//Höhe Motorhalterung
+motorh=20;
+//Abstand
+abstand=1;
+
+/****** ABGELEITETE VARIABLEN ******/
+
+//Aussenduchmesser des Querrohrs
+rohrad=rohrid+2*wand;
 //Aussenradius des Topfs
-topfradius=achse+rohr+wand;
+topfradius=achse+rohrad+wand;
 //Aussenhöhe des Topfs
-topfhoehe=wand+rohr+3; //3=abstand boden + rotordeckel + deckel
+topfhoehe=wand+rohrad+3; //3=abstand boden + rotordeckel + deckel
+rotorradius=topfradius-wand-abstand/2;
+rotorhoehe=topfhoehe-wand-abstand;
 $fn=100;
 
-bugstrahlruder_topf();
-translate([0,-4*rohr,0]) 
-    bugstrahlruder_deckel();
-translate([4*rohr,0,0]) 
-    bugstrahlruder_rotor();
+/****** DIE BAUTEILE ******/
 
-//translate([0,0,wand+rohr+3]) rotate([0,180,0]) bugstrahlruder_rotor();
+bugstrahlruder_topf();
+translate([0,-4*rohrad,0]) 
+    bugstrahlruder_deckel();
+translate([4*rohrad,0,0]) 
+    bugstrahlruder_rotor(rotorradius, rotorhoehe, achse);
+
 
 /*****************************************************************/
 /* TOPF                                                          */
@@ -50,9 +68,12 @@ module bugstrahlruder_topf()
             //Topfmassiv
             cylinder(h=topfhoehe,r=topfradius);
             //Querrohr
-            translate([-(0.5*laenge),topfradius-rohr/2-2*wand,topfhoehe/2])
+            translate([-(0.5*laenge),topfradius-rohrad/2-2*wand,topfhoehe/2])
                 rotate(a=[0,90,0])
-                    cylinder(h=laenge,d=rohr);
+                    cylinder(h=laenge,d=rohrad);
+            //Stütze Querrohr
+            translate([-laenge/2,topfradius-rohrad/2-2.5*wand,0]) 
+                cube([laenge,wand,topfhoehe/2]);
             //Befestigungsrand
             difference()
             {
@@ -65,13 +86,13 @@ module bugstrahlruder_topf()
         translate([0,0,wand])
             cylinder(h=topfhoehe-wand,r=topfradius-wand);
         //Querrohrinneres
-        translate([-(0.5*laenge),topfradius-rohr/2-2*wand,topfhoehe/2])
+        translate([-(0.5*laenge),topfradius-rohrad/2-2*wand,topfhoehe/2])
             rotate(a=[0,90,0])
-                cylinder(h=laenge,r=rohr/2-wand);
+                cylinder(h=laenge,r=rohrad/2-wand);
         //Dichtungsnut
         dichtungsnut();
         //Wellenaufnahme im Boden
-        //translate([0,0,wand-1]) cylinder(h=1,r=achse/2+0.1);
+        translate([0,0,wand/2]) cylinder(h=wand/2,d=achse+0.2);
     }
 }
 
@@ -119,14 +140,8 @@ module bugstrahlruder_deckel()
 {
     difference()
     {
-        union()
-        {
-            //Deckelscheibe
-            cylinder(h=wand,r=topfradius+nut+schraube+2*wand);
-            //Wellenhalterung
-            //translate([0,0,wand])
-                //cylinder(h=15,r=3+wand,$fn=100);
-        }
+        //Deckelscheibe
+        cylinder(h=wand,r=topfradius+nut+schraube+2*wand);
         //davon abziehen:
         //Schraubenlöcher
         for (i = [0:2])
@@ -167,28 +182,25 @@ module bugstrahlruder_deckel()
 /*****************************************************************/
 /* ROTOR                                                         */
 /*****************************************************************/
-module bugstrahlruder_rotor()
+module bugstrahlruder_rotor(rotorradius, rotorhoehe, achse)
 {
-    radius=achse+rohr-0.5;
-    hoehe=rohr+3-1; //topfhoehe - wand - 1mm Spalt
-    
     difference()
     {
         union()
         {
             //Rotorscheibe
-            cylinder(h=wand,r=radius);
+            cylinder(h=wand,r=rotorradius);
             //Rotorflügel
             for (i = [0:2])
                 rotate([0,0,120*i])
                     translate([-wand/2,0,0])
-                        cube([wand,radius,hoehe]); 
+                        cube([wand,rotorradius,rotorhoehe]); 
             //Rotorzentrum
-            cylinder(h=hoehe,r=achse/2+1.5*wand);
+            cylinder(h=rotorhoehe,d=achse+2.5*wand);
         }
         //davon abziehen:
         //Achsloch
-        cylinder(h=hoehe,r=achse/2);
+        cylinder(h=rotorhoehe,d=achse);
         //Loch für Madenschraube M2
         translate([0,0,3*wand]) //Höhe 2*wand über Rotorscheibe
             rotate([90,0,0]) //cylinder flachlegen
