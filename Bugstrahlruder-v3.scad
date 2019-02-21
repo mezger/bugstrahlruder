@@ -118,7 +118,7 @@ module befestigungsloecher()
                     cylinder(h=3*wand,r=schraube/2);
                 //Ausschnitt für Mutter M3
                 translate([0,topfradius+nut+schraube/2+wand,topfhoehe-5*wand])
-                    cylinder(h=4*wand,r=5.5/2/cos(180/6)+0.05,$fn=6);
+                    cylinder(h=3.5*wand,r=5.5/2/cos(180/6)+0.05,$fn=6);
             }
 }
 
@@ -140,14 +140,8 @@ module bugstrahlruder_deckel()
 {
     difference()
     {
-        union()
-        {
-            //Deckelscheibe
-            cylinder(h=wand,r=topfradius+nut+schraube+2*wand);
-            //Kegel zur Verstärkung
-            translate([0,0,wand]) 
-                cylinder(h=2*wand, r1=topfradius+nut+wand, r2=motord/2);
-        }
+        //Deckelscheibe
+        cylinder(h=wand,r=topfradius+nut+schraube+2*wand);
         //davon abziehen:
         //Schraubenlöcher
         for (i = [0:2])
@@ -165,6 +159,8 @@ module bugstrahlruder_deckel()
             {
                 //Motorhalter
                 cylinder(h=motorh,d=motord+2*wand);
+                //Kegel zur Verstärkung
+                cylinder(h=2*wand, r1=topfradius+nut+wand, r2=motord/2);
                 //Schraubenhubbel
                  for (i = [0:2]) //3 Hubbel
                     rotate([0,0,120*i]) //jeweils 120°
@@ -199,8 +195,8 @@ module bugstrahlruder_rotor(rotorradius, rotorhoehe, achse)
             //Rotorflügel
             for (i = [0:2])
                 rotate([0,0,120*i])
-                    translate([-wand/2,0,0])
-                        cube([wand,rotorradius,rotorhoehe]); 
+                    translate([-0.75*wand,0,0])
+                        cube([1.5*wand,rotorradius,rotorhoehe]); 
             //Rotorzentrum
             cylinder(h=rotorhoehe,d=achse+2.5*wand);
         }
